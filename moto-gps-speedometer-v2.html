@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08000b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Moto GPS">
+<title>Moto GPS Speedometer</title>
+<style>
+:root{color-scheme:dark;--bg:#050407;--panel:#151019;--text:#fff;--muted:#aaa;--accent:#f02ddd;--accent2:#8b20ff;--line:#39233c;--brightness:1}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);filter:brightness(var(--brightness));transition:background .2s,color .2s}
+button,input,select{font:inherit}button{color:var(--text);cursor:pointer}header{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 18px}header strong{letter-spacing:1.6px;font-size:14px}button.ghost{background:transparent;border:1px solid var(--line);border-radius:11px;padding:8px 11px}
+main{max-width:650px;margin:auto;padding:0 14px 12px}.page{display:none}.page.active{display:block}.gauge-wrap{position:relative;width:min(88vw,500px);aspect-ratio:1;margin:clamp(18px,4vh,42px) auto 24px}
+.ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 225deg,transparent 0deg,transparent 1deg,var(--accent) 2deg,var(--accent2) 135deg,var(--accent) 269deg,transparent 270deg);mask:radial-gradient(circle,transparent 0 63%,#000 64% 73%,transparent 74%);-webkit-mask:radial-gradient(circle,transparent 0 63%,#000 64% 73%,transparent 74%)}
+.ticks{position:absolute;inset:6%;border-radius:50%}.tick{position:absolute;left:calc(50% - 1.5px);top:0;width:3px;height:20%;background:#080609;transform-origin:50% 100%;border-radius:2px}
+.center{position:absolute;inset:26% 18% 25%;border-radius:50%;background:radial-gradient(ellipse,#251028 0%,var(--bg) 72%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.unit{font-size:23px}.speed{font-size:clamp(68px,18vw,94px);font-weight:650;letter-spacing:-3px;line-height:1;font-variant-numeric:tabular-nums}.distance{font-size:21px;color:var(--muted)}.endlabel{position:absolute;top:68%;font-size:26px;font-weight:600}.left{left:18%}.right{right:15%}
+.status{text-align:center;color:var(--muted);font-size:12px;min-height:20px;margin-bottom:18px}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:17px 8px;text-align:center;margin:0 0 20px}.stat-label{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.4px;margin-bottom:5px}.stat-value{font-size:21px;font-variant-numeric:tabular-nums}
+.actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin:12px 0 20px}.primary{background:linear-gradient(110deg,var(--accent2),var(--accent));border:0;border-radius:12px;padding:12px 17px;font-weight:700}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin:12px 0}.panel h2{font-size:15px;letter-spacing:1px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px;line-height:1.5}.big{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.row label{font-size:14px}.row input[type=range]{width:48%;accent-color:var(--accent)}.row input[type=color]{width:45px;height:35px;border:0;background:transparent}.row select{background:var(--bg);color:var(--text);border:1px solid var(--line);padding:7px;border-radius:8px;max-width:58%}
+input[type=range]{accent-color:var(--accent)}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.metric{background:var(--bg);border-radius:12px;padding:12px}.metric small{color:var(--muted);display:block;margin-bottom:5px}.metric b{font-size:20px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:9px 5px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted)}.table-wrap{overflow-x:auto}
+nav{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--panel);border-top:1px solid var(--line);padding:9px 2px calc(8px + env(safe-area-inset-bottom));margin:0 -14px;z-index:5}
+nav button{border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;padding:4px 0}nav button.active{color:var(--accent)}nav .sym{font-size:21px}
+.notice{background:#241b0d;border:1px solid #6a4b1a;color:#ffe0a0;padding:11px;border-radius:12px;font-size:12px;line-height:1.5}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 4px}.danger{border:1px solid #74303c;color:#ff9ca8;border-radius:10px;padding:9px 12px;background:transparent}.success{color:#7fe3ad}
+body.light{--bg:#f3f1f6;--panel:#fff;--text:#211727;--muted:#69616f;--line:#ded5e4}body.light .center{background:radial-gradient(ellipse,#f1dcf4 0%,var(--bg) 72%)}body.light .tick{background:#f3f1f6}
+@media(min-width:560px){main{padding-left:24px;padding-right:24px}nav{margin:0 -24px}}
+</style>
+</head>
+<body>
+<header><strong>🏍️ MOTO GPS</strong><button class="ghost" id="quickReset">รีเซ็ต</button></header>
+<main>
+<section class="page active" id="p-gauge">
+ <div class="gauge-wrap"><div class="ring"></div><div class="ticks" id="ticks"></div>
+  <div class="center"><div class="unit">km/h</div><div class="speed" id="speed">0</div><div class="distance" id="distance">0.0 km</div></div>
+  <div class="endlabel left">0</div><div class="endlabel right">240</div>
+ </div>
+ <div class="status" id="gpsStatus">ยังไม่ได้เริ่ม GPS · แตะ “เริ่มวัด” ในแท็บ GPS</div>
+ <div class="stats">
+  <div><div class="stat-label">AVG SPEED</div><div class="stat-value" id="avg">0 km/h</div></div>
+  <div><div class="stat-label">MAX SPEED</div><div class="stat-value" id="max">0 km/h</div></div>
+  <div><div class="stat-label">TRIP TIME</div><div class="stat-value" id="elapsed">00:00</div></div>
+  <div><div class="stat-label">STOP TIME</div><div class="stat-value" id="stopped">00:00</div></div>
+ </div>
+ <div class="actions"><button class="primary" id="startBtn">เริ่มวัด GPS</button><button class="ghost" id="lapBtn">บันทึกรอบ</button><button class="ghost" id="saveTripBtn">จบและบันทึกทริป</button></div>
+ <div class="notice">ขับขี่อย่างปลอดภัย: ตั้งค่าและดูข้อมูลเมื่อจอดรถในที่ปลอดภัยเท่านั้น GPS อาจคลาดเคลื่อน และไม่ควรใช้แทนมาตรวัดความเร็วของรถ</div>
+</section>
+<section class="page" id="p-history">
+ <div class="panel"><h2>ประวัติการเดินทาง</h2><p class="muted">บันทึกในอุปกรณ์นี้ผ่าน Local Storage ไม่ได้ส่งขึ้นเซิร์ฟเวอร์</p><div id="tripHistory" class="empty">ยังไม่มีทริปที่บันทึก</div><div class="actions"><button class="ghost" id="exportBtn">ส่งออก CSV</button><button class="danger" id="clearHistory">ลบประวัติทั้งหมด</button></div></div>
+ <div class="panel"><h2>สถิติรอบปัจจุบัน</h2><div id="lapStats" class="empty">กด “บันทึกรอบ” ที่หน้ามาตรวัดเพื่อเริ่มเก็บสถิติ</div></div>
+</section>
+<section class="page" id="p-accel">
+ <div class="panel"><h2>จับเวลาเร่งความเร็ว</h2><p class="muted">ระบบจะจับเวลาเมื่อความเร็ว GPS ผ่าน 0 → 60 หรือ 0 → 100 km/h ระหว่างทริปเดียวกัน ค่าที่วัดได้ขึ้นกับสัญญาณ GPS</p>
+  <div class="two"><div class="metric"><small>0–60 km/h</small><b id="t60">—</b></div><div class="metric"><small>0–100 km/h</small><b id="t100">—</b></div></div>
+  <div class="row"><label>สถานะ</label><span id="accelStatus" class="muted">รอเริ่ม GPS</span></div>
+  <div class="actions"><button class="primary" id="armAccel">เริ่มจับรอบเร่งใหม่</button></div>
+ </div>
+ <div class="panel"><h2>ผลการเร่งล่าสุด</h2><div id="accelHistory" class="empty">ยังไม่มีผลการจับเวลา</div></div>
+</section>
+<section class="page" id="p-gps">
+ <div class="panel"><h2>สถานะ GPS</h2><div class="row"><label>ละติจูด</label><span id="lat">—</span></div><div class="row"><label>ลองจิจูด</label><span id="lon">—</span></div><div class="row"><label>ความแม่นยำ</label><span id="accuracy">—</span></div><div class="row"><label>เวลาอัปเดต</label><span id="gpsTime">—</span></div><div class="row"><label>ความเร็ว GPS</label><span id="gpsSpeed">—</span></div>
+  <div class="actions"><button class="primary" id="gpsStart">เริ่มวัด GPS</button><button class="ghost" id="copyCoords">คัดลอกพิกัด</button></div><p class="muted">ตำแหน่งจะแสดงเมื่ออนุญาต Location ให้ Safari และเปิดหน้าเว็บผ่าน HTTPS</p></div>
+</section>
+<section class="page" id="p-settings">
+ <div class="panel"><h2>ธีมและการแสดงผล</h2>
+  <div class="row"><label>สีหลัก</label><input id="color1" type="color" value="#f02ddd"></div>
+  <div class="row"><label>สีรอง</label><input id="color2" type="color" value="#8b20ff"></div>
+  <div class="row"><label>ความสว่าง</label><input id="brightness" type="range" min="0.55" max="1.25" step="0.05" value="1"><span id="brightnessVal">100%</span></div>
+  <div class="row"><label>โหมดกลางคืน</label><button class="ghost" id="themeToggle">สลับสว่าง/มืด</button></div>
+  <div class="row"><label>หน่วยความเร็ว</label><select id="unitSelect"><option value="kmh">km/h</option><option value="mph">mph</option></select></div>
+  <div class="actions"><button class="ghost" id="restoreTheme">คืนค่าสีเริ่มต้น</button></div>
+ </div>
+ <div class="panel"><h2>ข้อมูลและออฟไลน์</h2><p class="muted">ประวัติและค่าธีมบันทึกไว้ในอุปกรณ์ หากเพิ่มเว็บนี้ไปหน้าจอโฮมจะเปิดได้สะดวก แต่การทำงานออฟไลน์แบบสมบูรณ์ต้องมี Service Worker ซึ่งต้องติดตั้งจากไฟล์แยกและโฮสต์ผ่าน HTTPS</p><div id="offlineStatus" class="muted">ตรวจสอบการเชื่อมต่อ…</div><div class="row"><label>ข้อมูลที่เก็บ</label><span>ทริป / รอบเร่ง / ธีม</span></div><button class="danger" id="clearAll">ล้างข้อมูลในอุปกรณ์</button></div>
+</section>
+</main>
+<nav>
+<button class="active" data-page="gauge"><span class="sym">◉</span>มาตรวัด</button>
+<button data-page="history"><span class="sym">▤</span>ประวัติ</button>
+<button data-page="accel"><span class="sym">⚡</span>เร่ง 0–100</button>
+<button data-page="gps"><span class="sym">⌖</span>GPS</button>
+<button data-page="settings"><span class="sym">⚙</span>ตั้งค่า</button>
+</nav>
+<script>
+const $=id=>document.getElementById(id), KEY='motoGpsV2';
+const state={watch:null,last:null,speed:0,max:0,distance:0,elapsed:0,stopped:0,samples:[],laps:[],tripStart:null,timer:null,coords:null,accelArmed:false,accelStart:null,t60:null,t100:null,accels:[],unit:'kmh'};
+for(let i=0;i<13;i++){let t=document.createElement('div');t.className='tick';t.style.transform=`rotate(${-135+i*22.5}deg)`;$('ticks').appendChild(t)}
+function fmt(sec){if(!Number.isFinite(sec))return'—';let s=Math.max(0,Math.floor(sec));return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+function displaySpeed(v){return state.unit==='mph'?v/1.609344:v}
+function speedUnit(){return state.unit==='mph'?'mph':'km/h'}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({history:state.history||[],theme:{c1:$('color1').value,c2:$('color2').value,brightness:$('brightness').value,light:document.body.classList.contains('light'),unit:state.unit},accels:state.accels}))}catch(e){}}
+function load(){try{let d=JSON.parse(localStorage.getItem(KEY)||'{}');state.history=d.history||[];state.accels=d.accels||[];if(d.theme){$('color1').value=d.theme.c1||'#f02ddd';$('color2').value=d.theme.c2||'#8b20ff';$('brightness').value=d.theme.brightness||1;state.unit=d.theme.unit||'kmh';$('unitSelect').value=state.unit;if(d.theme.light)document.body.classList.add('light');applyTheme()}}catch(e){state.history=[];state.accels=[]}}
+function applyTheme(){document.documentElement.style.setProperty('--accent',$('color1').value);document.documentElement.style.setProperty('--accent2',$('color2').value);let b=+$('brightness').value;document.documentElement.style.setProperty('--brightness',b);$('brightnessVal').textContent=Math.round(b*100)+'%';document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();save()}
+function update(){const v=displaySpeed(state.speed);$('speed').textContent=Math.round(v);$('distance').textContent=state.distance.toFixed(2)+' km';$('avg').textContent=(displaySpeed(state.samples.length?state.samples.reduce((a,b)=>a+b,0)/state.samples.length:0)).toFixed(0)+' '+speedUnit();$('max').textContent=displaySpeed(state.max).toFixed(0)+' '+speedUnit();$('elapsed').textContent=fmt(state.elapsed);$('stopped').textContent=fmt(state.stopped);$('gpsSpeed').textContent=v.toFixed(1)+' '+speedUnit();$('t60').textContent=state.t60===null?'—':state.t60.toFixed(2)+' s';$('t100').textContent=state.t100===null?'—':state.t100.toFixed(2)+' s';$('accelStatus').textContent=state.accelArmed?'กำลังจับเวลาเมื่อเริ่มเคลื่อนที่':'กดเริ่มจับรอบเร่งใหม่';renderLaps();renderHistory();renderAccelHistory()}
+function startGps(){if(!navigator.geolocation){$('gpsStatus').textContent='เบราว์เซอร์ไม่รองรับ GPS';return}if(!window.isSecureContext){$('gpsStatus').textContent='ต้องเปิดผ่าน HTTPS เพื่อใช้ GPS';return}if(state.watch!==null)return;$('gpsStatus').textContent='กำลังขอตำแหน่ง GPS…';state.tripStart=state.tripStart||Date.now();state.watch=navigator.geolocation.watchPosition(pos=>{const c=pos.coords;state.coords={lat:c.latitude,lon:c.longitude,accuracy:c.accuracy,time:pos.timestamp};let raw=c.speed==null?0:Math.max(0,c.speed*3.6);if(raw>300)raw=0;state.speed=raw;state.max=Math.max(state.max,raw);if(raw>=1)state.samples.push(raw);if(state.last){let R=6371000,rad=x=>x*Math.PI/180,dl=rad(c.latitude-state.last.lat),dn=rad(c.longitude-state.last.lon),a=Math.sin(dl/2)**2+Math.cos(rad(state.last.lat))*Math.cos(rad(c.latitude))*Math.sin(dn/2)**2,d=2*R*Math.asin(Math.sqrt(a));if(d<150&&d>0)state.distance+=d/1000}state.last={lat:c.latitude,lon:c.longitude};$('gpsStatus').textContent=`GPS พร้อม · ความแม่นยำ ±${Math.round(c.accuracy)} ม.`;$('lat').textContent=c.latitude.toFixed(6);$('lon').textContent=c.longitude.toFixed(6);$('accuracy').textContent='±'+Math.round(c.accuracy)+' m';$('gpsTime').textContent=new Date(pos.timestamp).toLocaleTimeString();$('gpsSpeed').textContent=displaySpeed(raw).toFixed(1)+' '+speedUnit();checkAccel(raw);update()},err=>{$('gpsStatus').textContent=err.code===1?'ไม่ได้รับอนุญาตตำแหน่ง กรุณาเปิดสิทธิ์ Safari':err.code===2?'หาตำแหน่งไม่พบ ลองในที่โล่ง':'หมดเวลารอ GPS';state.watch=null},{enableHighAccuracy:true,maximumAge:1000,timeout:15000});if(!state.timer)state.timer=setInterval(()=>{if(state.watch!==null){state.elapsed++;if(state.speed<1)state.stopped++;update()}},1000)}
+function checkAccel(v){if(!state.accelArmed)return;let now=performance.now();if(v<3&&state.accelStart===null){state.accelStart=now;state.t60=null;state.t100=null}if(state.accelStart!==null){let t=(now-state.accelStart)/1000;if(v>=60&&state.t60===null)state.t60=t;if(v>=100&&state.t100===null){state.t100=t;state.accels.unshift({date:new Date().toLocaleString(),t60:state.t60,t100:state.t100});state.accels=state.accels.slice(0,30);save();state.accelArmed=false}}}
+function resetTrip(){state.max=0;state.distance=0;state.elapsed=0;state.stopped=0;state.samples=[];state.laps=[];state.tripStart=Date.now();state.t60=null;state.t100=null;state.accelStart=null;update()}
+function saveTrip(){if(state.elapsed===0&&state.distance===0){$('gpsStatus').textContent='ยังไม่มีข้อมูลทริปให้บันทึก';return}state.history=state.history||[];state.history.unshift({date:new Date(state.tripStart||Date.now()).toLocaleString(),distance:state.distance,elapsed:state.elapsed,stopped:state.stopped,avg:state.samples.length?state.samples.reduce((a,b)=>a+b,0)/state.samples.length:0,max:state.max,laps:state.laps.length});state.history=state.history.slice(0,100);save();$('gpsStatus').textContent='บันทึกทริปแล้ว';resetTrip()}
+function recordLap(){const prev=state.laps.length?state.laps[state.laps.length-1].elapsed:0;state.laps.push({n:state.laps.length+1,elapsed:state.elapsed,lapTime:state.elapsed-prev,distance:state.distance,max:state.max,avg:state.samples.length?state.samples.reduce((a,b)=>a+b,0)/state.samples.length:0});update()}
+function renderLaps(){let el=$('lapStats');if(!state.laps.length){el.className='empty';el.textContent='ยังไม่มีรอบ';return}el.className='table-wrap';el.innerHTML='<table><thead><tr><th>รอบ</th><th>เวลา/รอบ</th><th>ระยะรวม</th><th>Max</th></tr></thead><tbody>'+state.laps.map(l=>`<tr><td>${l.n}</td><td>${fmt(l.lapTime)}</td><td>${l.distance.toFixed(2)} km</td><td>${displaySpeed(l.max).toFixed(0)} ${speedUnit()}</td></tr>`).join('')+'</tbody></table>'}
+function renderHistory(){let el=$('tripHistory'),h=state.history||[];if(!h.length){el.className='empty';el.textContent='ยังไม่มีทริปที่บันทึก';return}el.className='table-wrap';el.innerHTML='<table><thead><tr><th>วันเวลา</th><th>ระยะ</th><th>เวลา</th><th>เฉลี่ย</th><th>สูงสุด</th></tr></thead><tbody>'+h.map(x=>`<tr><td>${escapeHtml(x.date)}</td><td>${x.distance.toFixed(2)} km</td><td>${fmt(x.elapsed)}</td><td>${displaySpeed(x.avg).toFixed(0)}</td><td>${displaySpeed(x.max).toFixed(0)}</td></tr>`).join('')+'</tbody></table>'}
+function renderAccelHistory(){let el=$('accelHistory');if(!state.accels.length){el.className='empty';el.textContent='ยังไม่มีผลการจับเวลา';return}el.className='table-wrap';el.innerHTML='<table><thead><tr><th>วันเวลา</th><th>0–60</th><th>0–100</th></tr></thead><tbody>'+state.accels.map(x=>`<tr><td>${escapeHtml(x.date)}</td><td>${x.t60===null?'—':x.t60.toFixed(2)+' s'}</td><td>${x.t100===null?'—':x.t100.toFixed(2)+' s'}</td></tr>`).join('')+'</tbody></table>'}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function exportCsv(){let rows=[['date','distance_km','elapsed_seconds','stopped_seconds','average_kmh','max_kmh','laps'],...(state.history||[]).map(x=>[x.date,x.distance,x.elapsed,x.stopped,x.avg,x.max,x.laps])];let csv=rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');let url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}));let a=document.createElement('a');a.href=url;a.download='moto-gps-trips.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id==='p-'+b.dataset.page));if(b.dataset.page==='history'){renderHistory();renderLaps()}}));
+$('startBtn').onclick=startGps;$('gpsStart').onclick=startGps;$('quickReset').onclick=()=>{if(confirm('รีเซ็ตสถิติทริปปัจจุบัน?'))resetTrip()};$('lapBtn').onclick=recordLap;$('saveTripBtn').onclick=saveTrip;
+$('armAccel').onclick=()=>{state.accelArmed=true;state.accelStart=null;state.t60=null;state.t100=null;$('accelStatus').textContent='รอเริ่มเคลื่อนที่จากความเร็วต่ำ';update()};
+$('color1').oninput=applyTheme;$('color2').oninput=applyTheme;$('brightness').oninput=applyTheme;$('themeToggle').onclick=()=>{document.body.classList.toggle('light');save();applyTheme()};$('unitSelect').onchange=()=>{state.unit=$('unitSelect').value;save();update()};$('restoreTheme').onclick=()=>{$('color1').value='#f02ddd';$('color2').value='#8b20ff';$('brightness').value=1;document.body.classList.remove('light');state.unit='kmh';$('unitSelect').value='kmh';applyTheme();update()};
+$('copyCoords').onclick=async()=>{if(!state.coords){alert('ยังไม่มีพิกัด GPS');return}let s=state.coords.lat.toFixed(6)+', '+state.coords.lon.toFixed(6);try{await navigator.clipboard.writeText(s);alert('คัดลอกพิกัดแล้ว')}catch(e){prompt('คัดลอกพิกัดนี้',s)}};
+$('exportBtn').onclick=exportCsv;$('clearHistory').onclick=()=>{if(confirm('ลบประวัติการเดินทางทั้งหมด?')){state.history=[];save();renderHistory()}};$('clearAll').onclick=()=>{if(confirm('ลบประวัติและการตั้งค่าที่บันทึกในอุปกรณ์?')){localStorage.removeItem(KEY);state.history=[];state.accels=[];load();update()}};
+function onlineStatus(){$('offlineStatus').textContent=navigator.onLine?'เชื่อมต่ออินเทอร์เน็ตอยู่':'ออฟไลน์ · หน้าเว็บที่เปิดอยู่ยังแสดงได้ แต่ GPS อาจต้องใช้บริการตำแหน่งของระบบ';}
+window.addEventListener('online',onlineStatus);window.addEventListener('offline',onlineStatus);
+load();applyTheme();update();onlineStatus();
+</script>
+</body></html>
